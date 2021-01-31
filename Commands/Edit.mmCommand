@@ -1,0 +1,9 @@
+{
+    name           = 'Edit';
+    uuid           = 'B1E592DF-819D-42A1-BFC2-F33EC91D2067';
+    keyEquivalent  = '^O';
+    saveForEditing = 1;
+    input          = 'canonical';
+    environment    = 'MM_TITLE=${subject.body}\n';
+    command        = '#!/bin/sh\n"$MM_BUNDLE_SUPPORT/bin/edit" &>/dev/null &\n';
+}

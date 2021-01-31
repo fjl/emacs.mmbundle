@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>contactEmailRot13</key>
+	<string>swy@gjhefg.pbz</string>
+	<key>contactName</key>
+	<string>Felix Lange</string>
+	<key>description</key>
+	<string>Integration with Emacs.</string>
+	<key>name</key>
+	<string>Emacs</string>
+	<key>uuid</key>
+	<string>B6996E37-1FA9-4120-A588-DAD8B9DA39AA</string>
+</dict>
+</plist>

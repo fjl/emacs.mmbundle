@@ -1,0 +1,70 @@
+#!/usr/bin/env ruby
+
+require 'etc'
+require 'open3'
+
+def escape_quotes(str)
+  str.gsub(/["\\]/, {'"' => '\\"', '\\' => '\\\\'})
+end
+
+def fatal(msg)
+  puts msg
+  exec 'osascript', '-e', "tell app \"MailMate\" to display alert \"#{escape_quotes msg}\""
+end
+
+def return_to_mailmate
+  exec 'osascript', '-e', 'tell app "MailMate" to activate'
+end
+
+def find_emacsclient
+  path = `eval $(/usr/libexec/path_helper); echo $PATH`.split(':')
+  client_bin = path.detect { |dir| File.exists? "#{dir.chomp}/emacsclient" }
+  "#{client_bin}/emacsclient" if client_bin
+end
+
+$line = ENV["MM_LINE_NUMBER"]
+$file = ENV["MM_EDIT_FILEPATH"]
+$title = ENV["MM_TITLE"] || "(no subject)"
+$emacs_app = File.directory? '/Applications/Emacs.app'
+$emacsclient = find_emacsclient
+
+File.open("/Users/fjl/script-env.txt","w") do |out|
+  out.puts ENV.to_h
+end
+
+def open_emacsclient
+  alternative = 'sh -c "exit 3"'
+  title_opt = "((title . \"#{escape_quotes $title}\"))"
+  output, s = Open3.capture2e($emacsclient, "-a", alternative, "-F", title_opt, "-c", "+"+$line, $file)
+  return output, s.exitstatus
+end
+
+def open_app
+  begin
+    exec '/Applications/Emacs.app/Contents/MacOS/Emacs', "--title", $title, "+"+$line, $file
+  rescue SystemCallError => err
+    fatal "Can't launch Emacs.app:\n#{err}"
+  end
+end
+
+if $emacsclient
+  output, status = open_emacsclient
+  case status
+  when 0
+    return_to_mailmate
+  when 3
+    if $emacs_app
+      open_app
+    else
+      fatal "Can't connect to Emacs server. Start it with M-x (server-start)."
+    end
+  else
+    fatal "emacsclient exited with non-zero status code #{status}.\n\n#{output}"
+  end
+else # no emacsclient
+  if $emacs_app
+    open_app
+  else
+    fatal "emacsclient not found in PATH, and Emacs.app does not exist."
+  end
+end
