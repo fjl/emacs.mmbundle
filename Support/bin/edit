@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'etc'
 require 'open3'
 
 def escape_quotes(str)
