@@ -28,10 +28,6 @@ $title = ENV["MM_TITLE"] || "(no subject)"
 $emacs_app = File.directory? '/Applications/Emacs.app'
 $emacsclient = find_emacsclient
 
-File.open("/Users/fjl/script-env.txt","w") do |out|
-  out.puts ENV.to_h
-end
-
 def open_emacsclient
   alternative = 'sh -c "exit 3"'
   title_opt = "((title . \"#{escape_quotes $title}\"))"
