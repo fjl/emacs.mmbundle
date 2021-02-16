@@ -29,14 +29,14 @@ $emacsclient = find_emacsclient
 
 def open_emacsclient
   alternative = 'sh -c "exit 3"'
-  title_opt = "((title . \"#{escape_quotes $title}\"))"
-  output, s = Open3.capture2e($emacsclient, "-a", alternative, "-F", title_opt, "-c", "+"+$line, $file)
+  frame_params = "((title . \"#{escape_quotes $title}\") (width . 90))"
+  output, s = Open3.capture2e($emacsclient, "-a", alternative, "-F", frame_params, "-c", "+"+$line, $file)
   return output, s.exitstatus
 end
 
 def open_app
   begin
-    exec '/Applications/Emacs.app/Contents/MacOS/Emacs', "--title", $title, "+"+$line, $file
+    exec '/Applications/Emacs.app/Contents/MacOS/Emacs', "--title", $title, "--geometry", "90x50", "+"+$line, $file
   rescue SystemCallError => err
     fatal "Can't launch Emacs.app:\n#{err}"
   end
