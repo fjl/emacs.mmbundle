@@ -4,6 +4,6 @@
     keyEquivalent  = '^O';
     saveForEditing = 1;
     input          = 'canonical';
-    environment    = 'MM_TITLE=${subject.body}\n';
+    environment    = 'MM_TITLE=${subject.prefix:+${subject.prefix} }${subject.blob:+[${subject.blob}] }${subject.body}\n';
     command        = '#!/bin/sh\n"$MM_BUNDLE_SUPPORT/bin/edit" &>/dev/null &\n';
 }
