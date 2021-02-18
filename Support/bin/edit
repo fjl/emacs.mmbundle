@@ -30,36 +30,57 @@ $emacsclient = find_emacsclient
 def open_emacsclient
   alternative = 'sh -c "exit 3"'
   frame_params = "((title . \"#{escape_quotes $title}\") (width . 90))"
-  output, s = Open3.capture2e($emacsclient, "-a", alternative, "-F", frame_params, "-c", "+"+$line, $file)
+  flags = ["-a", alternative, "-F", frame_params, "-c"]
+  output, s = Open3.capture2e($emacsclient, *flags, "+"+$line, $file)
   return output, s.exitstatus
 end
 
+def emacs_init_file
+  ['.emacs', '.emacs.el', '.emacs.d/init.el', '.config/emacs/init.el'].each do |f|
+    file = Dir.home + '/' + f
+    return file if File.exists? file
+  end
+end
+
 def open_app
+  flags = ['--title', $title, '--geometry', '90x50']
+  # For some reason, Emacs.app doesn't always load the init file
+  # when launched from MailMate. Force it.
+  initfile = emacs_init_file
+  flags.append('--load', initfile) if initfile
   begin
-    exec '/Applications/Emacs.app/Contents/MacOS/Emacs', "--title", $title, "--geometry", "90x50", "+"+$line, $file
+    exec '/Applications/Emacs.app/Contents/MacOS/Emacs', *flags, "+"+$line, $file
   rescue SystemCallError => err
     fatal "Can't launch Emacs.app:\n#{err}"
   end
 end
 
-if $emacsclient
-  output, status = open_emacsclient
-  case status
-  when 0
-    return_to_mailmate
-  when 3
+def main
+  if $emacsclient
+    output, status = open_emacsclient
+    case status
+    when 0
+      return_to_mailmate
+    when 3
+      if $emacs_app
+        open_app
+      else
+        fatal "Can't connect to Emacs server. Start it with M-x (server-start)."
+      end
+    else
+      fatal "emacsclient exited with non-zero status code #{status}.\n\n#{output}"
+    end
+  else # no emacsclient
     if $emacs_app
       open_app
     else
-      fatal "Can't connect to Emacs server. Start it with M-x (server-start)."
+      fatal "emacsclient not found in PATH, and Emacs.app does not exist."
     end
-  else
-    fatal "emacsclient exited with non-zero status code #{status}.\n\n#{output}"
   end
-else # no emacsclient
-  if $emacs_app
-    open_app
-  else
-    fatal "emacsclient not found in PATH, and Emacs.app does not exist."
-  end
+end
+
+begin
+  main
+rescue Exception => err
+  fatal err.full_message
 end
